@@ -1,7 +1,7 @@
 ******************************************************************************
                   TI ARM Linker PC v20.2.7                     
 ******************************************************************************
->> Linked Tue Jan 28 20:05:15 2025
+>> Linked Tue Jan 28 20:34:37 2025
 
 OUTPUT FILE NAME:   <TivaC_sensor_reading.out>
 ENTRY POINT SYMBOL: "_c_int00_noinit_noargs"  address: 000007b9
