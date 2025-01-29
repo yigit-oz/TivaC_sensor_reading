@@ -18,7 +18,7 @@ main.obj: C:/ti/TivaWare_C_Series-2.2.0.295/driverlib/gpio.h
 main.obj: C:/ti/TivaWare_C_Series-2.2.0.295/driverlib/uart.h
 main.obj: C:/ti/TivaWare_C_Series-2.2.0.295/driverlib/flash.h
 main.obj: C:/ti/TivaWare_C_Series-2.2.0.295/driverlib/pin_map.h
-main.obj: C:/ti/TivaWare_C_Series-2.2.0.295/driverlib/eeprom.h
+main.obj: C:/ti/TivaWare_C_Series-2.2.0.295/driverlib/i2c.h
 
 ../main.c:
 
@@ -56,5 +56,5 @@ C:/ti/TivaWare_C_Series-2.2.0.295/driverlib/flash.h:
 
 C:/ti/TivaWare_C_Series-2.2.0.295/driverlib/pin_map.h:
 
-C:/ti/TivaWare_C_Series-2.2.0.295/driverlib/eeprom.h:
+C:/ti/TivaWare_C_Series-2.2.0.295/driverlib/i2c.h:
 
