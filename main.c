@@ -1,5 +1,6 @@
 #include <stdint.h>
 #include <stdbool.h>
+#include <stdio.h>
 #include "inc/hw_memmap.h"
 #include "driverlib/sysctl.h"
 #include "driverlib/gpio.h"
@@ -9,10 +10,10 @@
 #include "driverlib/i2c.h"
 
 #define BUFFER_SIZE 100
-#define SLAVE_ADDRESS_ONE 0x69
-#define SLAVE_ADDRESS_TWO 0x77
+#define BMX160 0x69 // CHIP_ID = D8 (address = 0x0)
+#define BME680 0x77 // CHIP_ID = 61 (for I2C, address = 0xD0)
 
-void InitI2C(uint8_t address) {
+void InitI2C() {
     SysCtlPeripheralEnable(SYSCTL_PERIPH_I2C1);
 
     SysCtlPeripheralEnable(SYSCTL_PERIPH_GPIOA);
@@ -59,7 +60,22 @@ void scanI2CAddress() {
 
 }
 
-uint8_t readSensorI2C(uint8_t address, uint8_t regAddress) {
+void writeRegisterI2C(uint8_t address, uint8_t regAddress, uint8_t value) {
+    I2CMasterSlaveAddrSet(I2C1_BASE, address, false);
+    I2CMasterDataPut(I2C1_BASE, regAddress);
+    I2CMasterControl(I2C1_BASE, I2C_MASTER_CMD_BURST_SEND_START);
+
+    while (I2CMasterBusy(I2C1_BASE)) {
+    }
+
+    I2CMasterDataPut(I2C1_BASE, value);
+    I2CMasterControl(I2C1_BASE, I2C_MASTER_CMD_BURST_SEND_FINISH);
+
+    while (I2CMasterBusy(I2C1_BASE)) {
+    }
+}
+
+uint8_t readRegisterI2C(uint8_t address, uint8_t regAddress) {
     I2CMasterSlaveAddrSet(I2C1_BASE, address, false);
     I2CMasterDataPut(I2C1_BASE, regAddress);
     I2CMasterControl(I2C1_BASE, I2C_MASTER_CMD_SINGLE_SEND);
@@ -169,20 +185,13 @@ int main(void)
     SysCtlClockSet(SYSCTL_SYSDIV_2_5 | SYSCTL_USE_PLL | SYSCTL_XTAL_16MHZ | SYSCTL_OSC_MAIN);
 
     InitUART();
-    InitI2C(SLAVE_ADDRESS_ONE);
+    InitI2C();
     //scanI2CAddress();
 
     SysCtlDelay(SysCtlClockGet());
-     uint8_t currAddress;
-     uint8_t value;
-     for(currAddress = 0x0; currAddress <= 0x7f; currAddress++) {
-         value = readSensorI2C(SLAVE_ADDRESS_ONE, currAddress);
-         if(value != 0) {
-             UARTCharPut(UART5_BASE, currAddress);
-         }
-
-         UARTCharPut(UART5_BASE, '\n');
-     }
+    writeRegisterI2C(BMX160, 0x42, 0x28);
+    UARTCharPut(UART5_BASE, readRegisterI2C(BMX160, 0x0));
+    UARTCharPut(UART5_BASE, readRegisterI2C(BMX160, 0x42));
 
     //loop();
 
