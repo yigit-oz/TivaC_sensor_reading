@@ -54,14 +54,12 @@ void scanI2CAddress() {
                 UARTCharPut(UART5_BASE, '\n');
             }
         }
-        SysCtlDelay(SysCtlClockGet());
+        SysCtlDelay(SysCtlClockGet() / 3);
     }
 
 }
 
-void readSensorI2C(uint8_t address, uint8_t regAddress) {
-    uint32_t value;
-
+uint8_t readSensorI2C(uint8_t address, uint8_t regAddress) {
     I2CMasterSlaveAddrSet(I2C1_BASE, address, false);
     I2CMasterDataPut(I2C1_BASE, regAddress);
     I2CMasterControl(I2C1_BASE, I2C_MASTER_CMD_SINGLE_SEND);
@@ -75,13 +73,7 @@ void readSensorI2C(uint8_t address, uint8_t regAddress) {
     while (I2CMasterBusy(I2C1_BASE)) {
     }
 
-    value = I2CMasterDataGet(I2C1_BASE);
-
-    while(1) {
-        UARTCharPut(UART5_BASE, value);
-        SysCtlDelay(SysCtlClockGet() / 3);
-    }
-
+    return I2CMasterDataGet(I2C1_BASE);
 
 }
 
@@ -174,13 +166,23 @@ void blinkLED() {
 
 int main(void)
 {
-
+    SysCtlClockSet(SYSCTL_SYSDIV_2_5 | SYSCTL_USE_PLL | SYSCTL_XTAL_16MHZ | SYSCTL_OSC_MAIN);
 
     InitUART();
     InitI2C(SLAVE_ADDRESS_ONE);
     //scanI2CAddress();
-    readSensorI2C(SLAVE_ADDRESS_ONE, 0x23);
 
+    SysCtlDelay(SysCtlClockGet());
+     uint8_t currAddress;
+     uint8_t value;
+     for(currAddress = 0x0; currAddress <= 0x7f; currAddress++) {
+         value = readSensorI2C(SLAVE_ADDRESS_ONE, currAddress);
+         if(value != 0) {
+             UARTCharPut(UART5_BASE, currAddress);
+         }
+
+         UARTCharPut(UART5_BASE, '\n');
+     }
 
     //loop();
 
