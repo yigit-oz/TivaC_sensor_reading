@@ -9,6 +9,8 @@
 #include "driverlib/pin_map.h"
 #include "driverlib/i2c.h"
 
+// Last Changes
+
 #define BUFFER_SIZE 100
 #define BMX160 0x69 // CHIP_ID = D8 (address = 0x0)
 #define BME680 0x77 // CHIP_ID = 61 (for I2C, address = 0xD0)
@@ -189,9 +191,9 @@ int main(void)
     //scanI2CAddress();
 
     SysCtlDelay(SysCtlClockGet());
-    writeRegisterI2C(BMX160, 0x42, 0x28);
+    //writeRegisterI2C(BMX160, 0x42, 0x28);
     UARTCharPut(UART5_BASE, readRegisterI2C(BMX160, 0x0));
-    UARTCharPut(UART5_BASE, readRegisterI2C(BMX160, 0x42));
+    UARTCharPut(UART5_BASE, readRegisterI2C(BMX160, 0x2));
 
     //loop();
 
