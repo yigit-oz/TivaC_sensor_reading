@@ -9,11 +9,31 @@
 #include "driverlib/pin_map.h"
 #include "driverlib/i2c.h"
 
-// Last Changes
+uint8_t readRegisterI2C(uint8_t address, uint8_t regAddress);
 
 #define BUFFER_SIZE 100
 #define BMX160 0x69 // CHIP_ID = D8 (address = 0x0)
 #define BME680 0x77 // CHIP_ID = 61 (for I2C, address = 0xD0)
+
+typedef struct {
+    int16_t gyrX, gyrY, gyrZ;
+} SensorData;
+
+void readParseGyroSensor(uint8_t slaveAddress, SensorData* data) {
+    uint8_t rawData[6];
+    uint8_t j = 0;
+    uint8_t i;
+
+    for(i = 0x0C; i <= 0x11; i++) {
+        rawData[j] = readRegisterI2C(slaveAddress, i);
+        j++;
+    }
+
+    data->gyrX = (int16_t)((rawData[1] << 8) | rawData[0]);
+    data->gyrY = (int16_t)((rawData[3] << 8) | rawData[2]);
+    data->gyrZ = (int16_t)((rawData[5] << 8) | rawData[4]);
+
+}
 
 void InitI2C() {
     SysCtlPeripheralEnable(SYSCTL_PERIPH_I2C1);
@@ -95,6 +115,13 @@ uint8_t readRegisterI2C(uint8_t address, uint8_t regAddress) {
 
 }
 
+void enableGyroSensor() {
+    writeRegisterI2C(BMX160, 0x7E, 0x11); // Enable accelerometer for gyro through cmd register 0x7E
+    writeRegisterI2C(BMX160, 0x7E, 0x15);
+    writeRegisterI2C(BMX160, 0x42, 0x2C);
+    writeRegisterI2C(BMX160, 0x43, 0x01);
+}
+
 void InitUART() {
 
     SysCtlPeripheralEnable(SYSCTL_PERIPH_UART5);
@@ -160,42 +187,26 @@ void loop() {
 
 }
 
-void blinkLED() {
-
-    SysCtlPeripheralEnable(SYSCTL_PERIPH_GPIOF);
-
-    while(!SysCtlPeripheralReady(SYSCTL_PERIPH_GPIOF)) {
-    }
-
-    GPIOPinTypeGPIOOutput(GPIO_PORTF_BASE, GPIO_PIN_3);
-
-    while(1) {
-
-        GPIOPinWrite(GPIO_PORTF_BASE, GPIO_PIN_3, GPIO_PIN_3);
-
-        SysCtlDelay(1000000);
-
-        GPIOPinWrite(GPIO_PORTF_BASE, GPIO_PIN_3, 0x0);
-
-        SysCtlDelay(1000000);
-    }
-
-}
-
 int main(void)
 {
     SysCtlClockSet(SYSCTL_SYSDIV_2_5 | SYSCTL_USE_PLL | SYSCTL_XTAL_16MHZ | SYSCTL_OSC_MAIN);
-
     InitUART();
     InitI2C();
-    //scanI2CAddress();
-
     SysCtlDelay(SysCtlClockGet());
-    //writeRegisterI2C(BMX160, 0x42, 0x28);
-    UARTCharPut(UART5_BASE, readRegisterI2C(BMX160, 0x0));
-    UARTCharPut(UART5_BASE, readRegisterI2C(BMX160, 0x2));
 
-    //loop();
+    enableGyroSensor();
+    UARTCharPut(UART5_BASE, readRegisterI2C(BMX160, 0x0)); // Chip Id
+    //UARTCharPut(UART5_BASE, readRegisterI2C(BMX160, 0x03)); // PMU register
+    //UARTCharPut(UART5_BASE, readRegisterI2C(BMX160, 0x42)); // GYR_CONF
+    //UARTCharPut(UART5_BASE, readRegisterI2C(BMX160, 0x43)); // GYR_RANGE
+    //UARTCharPut(UART5_BASE, readRegisterI2C(BMX160, 0x1B)); // Sensor Status
+
+    SensorData gyroData;
+    readParseGyroSensor(BMX160, &gyroData);
+
+    UARTCharPut(UART5_BASE, gyroData.gyrX);
+    UARTCharPut(UART5_BASE, gyroData.gyrY);
+    UARTCharPut(UART5_BASE, gyroData.gyrZ);
 
     return 0;
 }
