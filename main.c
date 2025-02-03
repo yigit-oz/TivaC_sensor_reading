@@ -16,22 +16,23 @@ uint8_t readRegisterI2C(uint8_t address, uint8_t regAddress);
 #define BME680 0x77 // CHIP_ID = 61 (for I2C, address = 0xD0)
 
 typedef struct {
-    int16_t gyrX, gyrY, gyrZ;
+    float gyrX, gyrY, gyrZ;
 } SensorData;
 
 void readParseGyroSensor(uint8_t slaveAddress, SensorData* data) {
     uint8_t rawData[6];
     uint8_t j = 0;
     uint8_t i;
+    const float scaleFactor = 0.0305;
 
     for(i = 0x0C; i <= 0x11; i++) {
         rawData[j] = readRegisterI2C(slaveAddress, i);
         j++;
     }
 
-    data->gyrX = (int16_t)((rawData[1] << 8) | rawData[0]);
-    data->gyrY = (int16_t)((rawData[3] << 8) | rawData[2]);
-    data->gyrZ = (int16_t)((rawData[5] << 8) | rawData[4]);
+    data->gyrX = (float)((int16_t)((rawData[1] << 8) | rawData[0]) * scaleFactor);
+    data->gyrY = (float)((int16_t)((rawData[3] << 8) | rawData[2]) * scaleFactor);
+    data->gyrZ = (float)((int16_t)((rawData[5] << 8) | rawData[4]) * scaleFactor);
 
 }
 
@@ -116,10 +117,10 @@ uint8_t readRegisterI2C(uint8_t address, uint8_t regAddress) {
 }
 
 void enableGyroSensor() {
-    writeRegisterI2C(BMX160, 0x7E, 0x11); // Enable accelerometer for gyro through cmd register 0x7E
-    writeRegisterI2C(BMX160, 0x7E, 0x15);
-    writeRegisterI2C(BMX160, 0x42, 0x2C);
-    writeRegisterI2C(BMX160, 0x43, 0x01);
+    writeRegisterI2C(BMX160, 0x7E, 0x11); // Set accelerometer normal mode through cmd register 0x7E
+    writeRegisterI2C(BMX160, 0x7E, 0x15); // Set gyroscope normal mode through cmd register 0x7E
+    writeRegisterI2C(BMX160, 0x42, 0x2C); // Set output data rate 1600 hz, bandwidth coefficient set to normal mode
+    writeRegisterI2C(BMX160, 0x43, 0x01); // Measurement range +-1000 degrees/s
 }
 
 void InitUART() {
@@ -195,18 +196,26 @@ int main(void)
     SysCtlDelay(SysCtlClockGet());
 
     enableGyroSensor();
+
+
     UARTCharPut(UART5_BASE, readRegisterI2C(BMX160, 0x0)); // Chip Id
-    //UARTCharPut(UART5_BASE, readRegisterI2C(BMX160, 0x03)); // PMU register
-    //UARTCharPut(UART5_BASE, readRegisterI2C(BMX160, 0x42)); // GYR_CONF
-    //UARTCharPut(UART5_BASE, readRegisterI2C(BMX160, 0x43)); // GYR_RANGE
-    //UARTCharPut(UART5_BASE, readRegisterI2C(BMX160, 0x1B)); // Sensor Status
+    UARTCharPut(UART5_BASE, readRegisterI2C(BMX160, 0x03)); // PMU register
+    UARTCharPut(UART5_BASE, readRegisterI2C(BMX160, 0x42)); // GYR_CONF
+    UARTCharPut(UART5_BASE, readRegisterI2C(BMX160, 0x43)); // GYR_RANGE
+    UARTCharPut(UART5_BASE, readRegisterI2C(BMX160, 0x1B)); // Sensor Status
 
     SensorData gyroData;
     readParseGyroSensor(BMX160, &gyroData);
 
-    UARTCharPut(UART5_BASE, gyroData.gyrX);
-    UARTCharPut(UART5_BASE, gyroData.gyrY);
-    UARTCharPut(UART5_BASE, gyroData.gyrZ);
+
+    while(1) {
+        readParseGyroSensor(BMX160, &gyroData);
+        UARTCharPut(UART5_BASE, gyroData.gyrX);
+        UARTCharPut(UART5_BASE, gyroData.gyrY);
+        UARTCharPut(UART5_BASE, gyroData.gyrZ);
+
+        SysCtlDelay(SysCtlClockGet() / 6);
+    }
 
     return 0;
 }
