@@ -12,6 +12,10 @@ GEN_CMDS__FLAG :=
 ORDERED_OBJS += \
 "./main.obj" \
 "./tm4c123gh6pm_startup_ccs.obj" \
+"./Source/I2C_Driver.obj" \
+"./Source/UART_Driver.obj" \
+"./Source/accelerometer.obj" \
+"./Source/gyroscope.obj" \
 "../tm4c123gh6pm.cmd" \
 $(GEN_CMDS__FLAG) \
 -llibc.a \
@@ -25,7 +29,9 @@ RMDIR := RMDIR /S/Q
 # All of the sources participating in the build are defined here
 -include sources.mk
 -include subdir_vars.mk
+-include Source/subdir_vars.mk
 -include subdir_rules.mk
+-include Source/subdir_rules.mk
 -include objects.mk
 
 ifneq ($(MAKECMDGOALS),clean)
@@ -143,8 +149,8 @@ TivaC_sensor_reading.out: $(OBJS) $(CMD_SRCS) $(GEN_CMDS)
 # Other Targets
 clean:
 	-$(RM) $(EXE_OUTPUTS__QUOTED)
-	-$(RM) "main.obj" "tm4c123gh6pm_startup_ccs.obj" 
-	-$(RM) "main.d" "tm4c123gh6pm_startup_ccs.d" 
+	-$(RM) "main.obj" "tm4c123gh6pm_startup_ccs.obj" "Source\I2C_Driver.obj" "Source\UART_Driver.obj" "Source\accelerometer.obj" "Source\gyroscope.obj" 
+	-$(RM) "main.d" "tm4c123gh6pm_startup_ccs.d" "Source\I2C_Driver.d" "Source\UART_Driver.d" "Source\accelerometer.d" "Source\gyroscope.d" 
 	-@echo 'Finished clean'
 	-@echo ' '
 

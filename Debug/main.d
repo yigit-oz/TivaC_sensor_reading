@@ -23,6 +23,11 @@ main.obj: C:/ti/TivaWare_C_Series-2.2.0.295/driverlib/uart.h
 main.obj: C:/ti/TivaWare_C_Series-2.2.0.295/driverlib/flash.h
 main.obj: C:/ti/TivaWare_C_Series-2.2.0.295/driverlib/pin_map.h
 main.obj: C:/ti/TivaWare_C_Series-2.2.0.295/driverlib/i2c.h
+main.obj: ../Include/gyroscope.h
+main.obj: C:/Users/Lenovo/workspace_v12/TivaC_sensor_reading/Include/I2C_Driver.h
+main.obj: C:/Users/Lenovo/workspace_v12/TivaC_sensor_reading/Include/UART_Driver.h
+main.obj: C:/Users/Lenovo/workspace_v12/TivaC_sensor_reading/Include/accelerometer.h
+main.obj: C:/Users/Lenovo/workspace_v12/TivaC_sensor_reading/Include/gyroscope.h
 
 ../main.c:
 
@@ -69,4 +74,14 @@ C:/ti/TivaWare_C_Series-2.2.0.295/driverlib/flash.h:
 C:/ti/TivaWare_C_Series-2.2.0.295/driverlib/pin_map.h:
 
 C:/ti/TivaWare_C_Series-2.2.0.295/driverlib/i2c.h:
+
+../Include/gyroscope.h:
+
+C:/Users/Lenovo/workspace_v12/TivaC_sensor_reading/Include/I2C_Driver.h:
+
+C:/Users/Lenovo/workspace_v12/TivaC_sensor_reading/Include/UART_Driver.h:
+
+C:/Users/Lenovo/workspace_v12/TivaC_sensor_reading/Include/accelerometer.h:
+
+C:/Users/Lenovo/workspace_v12/TivaC_sensor_reading/Include/gyroscope.h:
 
